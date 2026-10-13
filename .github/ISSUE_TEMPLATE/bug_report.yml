@@ -1,0 +1,37 @@
+name: Bug report
+description: Something in Epson Downloader does not work as expected.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown in the window title, for example v0.1.0.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Tab
+      options:
+        - Device Admin
+        - Model downloads
+        - Open Platform - Product keys
+        - Open Platform - PaperCut
+        - Open Platform - Firmware & documents
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: What happened?
+      description: Steps, the model or OS you selected, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log output
+      description: Copy the relevant lines from the log at the bottom of the window. Remove printer serial numbers and product keys.
+      render: text

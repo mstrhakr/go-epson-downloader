@@ -1,0 +1,22 @@
+name: Model or download not found
+description: A printer, driver, firmware, or manual is missing or wrong.
+labels: [epson-site]
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Printer model
+      placeholder: WF-C5790
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Epson page where the file appears
+      description: The epson.com or openplatform.epson.biz page that has the file, if you know it.
+  - type: textarea
+    id: details
+    attributes:
+      label: What is missing or wrong?
+    validations:
+      required: true

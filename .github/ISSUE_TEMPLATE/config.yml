@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Epson support
+    url: https://epson.com/support
+    about: Problems with a printer itself, rather than this downloader.
