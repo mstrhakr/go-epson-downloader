@@ -90,39 +90,33 @@ not affiliated with Epson.
 
 ## Build and run
 
-On Windows with Go 1.26 or newer:
+On Windows with Go 1.26 or newer (`go.mod` pins the `go1.26.9` toolchain, which Go
+downloads automatically):
 
 ```powershell
-.\build.ps1
+.\build.cmd
 .\bin\EpsonDownloader.exe
 ```
 
 The first build needs internet access to restore Go dependencies and the pinned
-manifest resource generator. The script embeds the Common Controls 6, DPI, and
-non-elevated application manifest and builds a stripped GUI executable (no
-console window). No C compiler is needed. The current build targets the host's
-Windows architecture; Windows amd64 is the tested target. Pass
-`-Version v1.2.3` to stamp a version into the window title (default `dev`).
+[go-winres](https://github.com/tc-hib/go-winres) resource generator. Resources live
+in `cmd/epson-downloader/winres/`: the app icon, the Common Controls 6 / DPI /
+non-elevated manifest, and version info shown in the exe's Properties → Details.
+The result is a stripped GUI executable (no console window). No C compiler is needed.
 
-## CI and releases
-
-- **CI** (`.github/workflows/ci.yml`) runs on pushes to `main` and pull requests on
-  `windows-latest`: `gofmt`, `go mod tidy -diff`, `go vet`, `go test`, and a build
-  uploaded as a workflow artifact.
-- **Release** (`.github/workflows/release.yml`) runs when a `v*.*.*` tag is pushed,
-  tests and builds with that version, and publishes a GitHub release with generated
-  notes. Tags containing `-` (for example `v0.2.0-rc1`) are marked prerelease.
-
-```powershell
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-- **Dependabot** checks Go modules and GitHub Actions weekly.
+- The version defaults to `git describe --tags --always --dirty` (for example
+  `v0.1.0` or `v0.1.0-2-gfe60839-dirty`) and appears in the window title and
+  file properties. Override it with `-Version v1.2.3`.
+- `-Arch arm64` builds `bin\EpsonDownloader-arm64.exe`; amd64 is the default and
+  the tested target.
+- `build.cmd` runs `build.ps1` with `-ExecutionPolicy Bypass` (preferring `pwsh`)
+  for machines that block unsigned scripts. Policies enforced by Group Policy
+  still apply.
 
 For development:
 
 ```powershell
+go generate ./cmd/epson-downloader   # once; tests need the manifest resource
 go test ./...
 go vet ./...
 ```
@@ -153,6 +147,22 @@ $env:EPSON_LIVE_KEY_SERIAL = 'XAV0000000'
 go test ./internal/epson -run '^TestLiveOpenPlatformIssue$' -v
 Remove-Item Env:\EPSON_LIVE_KEY_SERIAL
 ```
+
+## CI and releases
+
+- **CI** (`.github/workflows/ci.yml`) runs on pushes to `main` and pull requests on
+  `windows-latest`: `gofmt`, `go mod tidy -diff`, `go vet`, `go test`, and a build
+  uploaded as a workflow artifact.
+- **Release** (`.github/workflows/release.yml`) runs when a `v*.*.*` tag is pushed,
+  tests and builds with that version, and publishes a GitHub release with generated
+  notes. Tags containing `-` (for example `v0.2.0-rc1`) are marked prerelease.
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+- **Dependabot** checks Go modules and GitHub Actions weekly.
 
 ## Preserved Epson endpoints
 

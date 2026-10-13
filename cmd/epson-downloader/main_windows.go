@@ -2,7 +2,7 @@
 
 package main
 
-//go:generate go run github.com/akavel/rsrc@v0.10.2 -manifest app.manifest -o rsrc.syso
+//go:generate go run github.com/tc-hib/go-winres@v0.3.3 make --arch amd64,arm64
 
 import (
 	"context"
@@ -320,6 +320,9 @@ func (a *app) create() error {
 	}).Create()
 	if err != nil {
 		return err
+	}
+	if icon, err := walk.NewIconFromResourceId(1); err == nil {
+		a.window.SetIcon(icon)
 	}
 	a.window.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if a.busy {

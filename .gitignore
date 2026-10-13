@@ -1,2 +1,3 @@
 /bin/
-/cmd/epson-downloader/rsrc.syso
+/dist/
+/cmd/epson-downloader/*.syso
