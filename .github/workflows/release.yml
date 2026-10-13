@@ -20,6 +20,10 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # Tests create Walk windows, which need the Common Controls 6 manifest resource.
+      - name: Generate manifest resource
+        run: go generate ./cmd/epson-downloader
+
       - name: Vet
         run: go vet ./...
 
