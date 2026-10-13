@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Check formatting
+        run: |
+          $files = gofmt -l .
+          if ($files) { $files; throw 'Run gofmt on the files above.' }
+
+      - name: Verify modules
+        run: |
+          go mod tidy -diff
+          if ($LASTEXITCODE -ne 0) { throw 'Run go mod tidy.' }
+          go mod verify
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -cover ./...
+
+      - name: Build
+        run: ./build.ps1 -Version "ci-$("${{ github.sha }}".Substring(0, 7))"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EpsonDownloader-${{ github.sha }}
+          path: bin/EpsonDownloader.exe
+          retention-days: 14
