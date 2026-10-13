@@ -6,6 +6,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -20,8 +22,8 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # Tests create Walk windows, which need the Common Controls 6 manifest resource.
-      - name: Generate manifest resource
+      # Tests create Walk windows, which need the manifest resource (Common Controls 6).
+      - name: Generate Windows resources
         run: go generate ./cmd/epson-downloader
 
       - name: Vet
@@ -31,18 +33,34 @@ jobs:
         run: go test ./...
 
       - name: Build
-        run: ./build.ps1 -Version '${{ github.ref_name }}'
+        run: |
+          ./build.ps1 -Version '${{ github.ref_name }}' -Arch amd64
+          ./build.ps1 -Version '${{ github.ref_name }}' -Arch arm64
 
       - name: Package
         run: |
-          $name = 'EpsonDownloader-${{ github.ref_name }}-windows-amd64'
           New-Item -ItemType Directory -Force dist | Out-Null
-          Copy-Item bin/EpsonDownloader.exe "dist/$name.exe"
-          Compress-Archive -Path bin/EpsonDownloader.exe, README.md, LICENSE -DestinationPath "dist/$name.zip"
+          foreach ($arch in 'amd64', 'arm64') {
+            $exe = if ($arch -eq 'amd64') { 'bin/EpsonDownloader.exe' } else { "bin/EpsonDownloader-$arch.exe" }
+            $name = "EpsonDownloader-${{ github.ref_name }}-windows-$arch"
+            Copy-Item $exe "dist/$name.exe"
+            $stage = "stage/$arch"
+            New-Item -ItemType Directory -Force $stage | Out-Null
+            Copy-Item $exe "$stage/EpsonDownloader.exe"
+            Copy-Item README.md, LICENSE $stage
+            Compress-Archive -Path "$stage/*" -DestinationPath "dist/$name.zip"
+          }
           Get-ChildItem dist -File | ForEach-Object {
             "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"
           } | Set-Content -Encoding ascii dist/SHA256SUMS.txt
           Get-Content dist/SHA256SUMS.txt
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            dist/*.exe
+            dist/*.zip
 
       - name: Publish release
         env:

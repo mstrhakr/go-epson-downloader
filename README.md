@@ -10,8 +10,13 @@ to run it. Distribute just `EpsonDownloader.exe`.
 
 Download the latest build from
 [Releases](https://github.com/mstrhakr/go-epson-downloader/releases/latest).
-Each release includes the standalone `.exe`, a `.zip` with the README and license,
-and `SHA256SUMS.txt`.
+Each release includes standalone amd64 and arm64 `.exe` files, `.zip` files with
+the README and license, and `SHA256SUMS.txt`. Verify that a download was built by
+this repository's release workflow with:
+
+```powershell
+gh attestation verify EpsonDownloader-v0.1.1-windows-amd64.exe --repo mstrhakr/go-epson-downloader
+```
 
 ## Current features
 
@@ -157,8 +162,10 @@ Remove-Item Env:\EPSON_LIVE_KEY_SERIAL
   as a workflow artifact. govulncheck fails the build when a known vulnerability is
   reachable; standard-library findings are fixed by bumping `toolchain` in `go.mod`.
 - **Release** (`.github/workflows/release.yml`) runs when a `v*.*.*` tag is pushed,
-  tests and builds with that version, and publishes a GitHub release with generated
-  notes. Tags containing `-` (for example `v0.2.0-rc1`) are marked prerelease.
+  tests and builds amd64 and arm64 executables with that version, attests their
+  build provenance, and publishes a GitHub release with generated notes (grouped
+  by label via `.github/release.yml`). Tags containing `-` (for example
+  `v0.2.0-rc1`) are marked prerelease.
 
 ```powershell
 git tag v0.1.0
