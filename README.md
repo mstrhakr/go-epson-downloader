@@ -151,8 +151,11 @@ Remove-Item Env:\EPSON_LIVE_KEY_SERIAL
 ## CI and releases
 
 - **CI** (`.github/workflows/ci.yml`) runs on pushes to `main` and pull requests on
-  `windows-latest`: `gofmt`, `go mod tidy -diff`, `go vet`, `go test`, and a build
-  uploaded as a workflow artifact.
+  `windows-latest`: `gofmt`, `go mod tidy -diff`, `go vet`,
+  [golangci-lint](https://golangci-lint.run/) (config in `.golangci.yml`),
+  [govulncheck](https://go.dev/doc/security/vuln/), `go test`, and a build uploaded
+  as a workflow artifact. govulncheck fails the build when a known vulnerability is
+  reachable; standard-library findings are fixed by bumping `toolchain` in `go.mod`.
 - **Release** (`.github/workflows/release.yml`) runs when a `v*.*.*` tag is pushed,
   tests and builds with that version, and publishes a GitHub release with generated
   notes. Tags containing `-` (for example `v0.2.0-rc1`) are marked prerelease.

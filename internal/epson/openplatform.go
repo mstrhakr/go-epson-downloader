@@ -589,16 +589,15 @@ func AppendKeyLog(path string, keys []ProductKey, country, application string, i
 		file.Close()
 		return err
 	}
-	w := csv.NewWriter(file)
+	var rows [][]string
 	if info.Size() == 0 {
-		w.Write([]string{"Issued", "Serial Number", "Product Key", "Country/Region", "Application"})
+		rows = append(rows, []string{"Issued", "Serial Number", "Product Key", "Country/Region", "Application"})
 	}
 	stamp := issued.Format("2006-01-02 15:04:05")
 	for _, key := range keys {
-		w.Write([]string{stamp, key.Serial, key.Key, csvSafe(country), csvSafe(application)})
+		rows = append(rows, []string{stamp, key.Serial, key.Key, csvSafe(country), csvSafe(application)})
 	}
-	w.Flush()
-	if err := w.Error(); err != nil {
+	if err := csv.NewWriter(file).WriteAll(rows); err != nil {
 		file.Close()
 		return fmt.Errorf("write key log: %w", err)
 	}

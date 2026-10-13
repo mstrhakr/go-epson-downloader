@@ -1,0 +1,30 @@
+version: "2"
+
+linters:
+  settings:
+    staticcheck:
+      checks:
+        - all
+        - -ST1000 # package comments
+        - -ST1001 # dot imports are idiomatic for walk/declarative
+        - -ST1003 # naming
+        - -ST1005 # error messages start with the proper noun "Epson"
+        - -ST1016
+        - -ST1020
+        - -ST1021
+        - -ST1022
+  exclusions:
+    presets:
+      - std-error-handling
+      - common-false-positives
+    rules:
+      - path: _test\.go
+        linters: [errcheck]
+      # Walk setters only fail when the native control is gone; the UI ignores that.
+      - path: cmd/
+        linters: [errcheck]
+        text: "`[^`]*\\.(Set\\w*|Append\\w*|Insert\\w*|Remove\\w*|Clear\\w*|Invalidate|Focus\\w*)` is not checked"
+
+formatters:
+  enable:
+    - gofmt

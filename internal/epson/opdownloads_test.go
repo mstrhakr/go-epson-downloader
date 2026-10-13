@@ -57,8 +57,7 @@ const platformOPPage = `<html><body>
 
 func platformClient(t *testing.T) *Client {
 	t.Helper()
-	var c *Client
-	c = testClient(t, func(w http.ResponseWriter, r *http.Request) {
+	c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case platformPaperCut:
 			w.Write([]byte(platformPCPage))

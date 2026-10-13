@@ -37,18 +37,26 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Run go mod tidy.' }
           go mod verify
 
-      # Tests create Walk windows, which need the Common Controls 6 manifest resource.
-      - name: Generate manifest resource
+      # Tests create Walk windows, which need the manifest resource (Common Controls 6).
+      - name: Generate Windows resources
         run: go generate ./cmd/epson-downloader
 
       - name: Vet
         run: go vet ./...
 
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.14.0
+
+      - name: Vulnerability check
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+
       - name: Test
         run: go test -cover ./...
 
       - name: Build
-        run: ./build.ps1 -Version "ci-$("${{ github.sha }}".Substring(0, 7))"
+        run: ./build.ps1
 
       - uses: actions/upload-artifact@v4
         with:
